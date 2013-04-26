@@ -84,7 +84,7 @@ class Graph(object):
                                     self.unique_matches.append(b_node)
                     else:
                         continue
-        self.similar_node_amount=len(self.unique_matches)
+        self.similar_nodes_amount=len(self.unique_matches)
     def strict_connect_nodes_by(self,*args,**kwargs):
         for a_node in self.nodes:
             bad_a_node=False
@@ -118,11 +118,13 @@ class Graph(object):
                         bad_b_node=False
                         continue
                     else:
-                        a_node.connect_to(b_node)
-                        b_node.connect_to(a_node)
-                        self.similar_nodes_amount+=1
-                        if not a_node in self.unique_matches:
-                            self.unique_matches.append(a_node)
-                        if not b_node in self.unique_matches:
-                            self.unique_matches.append(b_node)
+                        if not a_node.is_connected(b_node) and not b_node.is_connected(a_node):
+                            a_node.connect_to(b_node)
+                            b_node.connect_to(a_node)
+                            self.similar_nodes_amount+=1
+                            if not a_node in self.unique_matches:
+                                self.unique_matches.append(a_node)
+                            if not b_node in self.unique_matches:
+                                self.unique_matches.append(b_node)
+        self.similar_nodes_amount=len(self.unique_matches)
     
