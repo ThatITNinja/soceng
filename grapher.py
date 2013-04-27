@@ -68,25 +68,48 @@ class Graph(object):
                         del_count+=1
             n_count+=1
     def loose_connect_nodes_by(self,*args,**kwargs):
+        bad_nodes=[]
         for a_node in self.nodes:
+            if a_node in bad_nodes:
+                continue
+            for k,v in kwargs.items():
+                if k in a_node.attrs:
+                    if a_node.attrs[k]==v:
+                        continue
+                    else:
+                        bad_nodes.append(a_node)
+                        continue
+                else:
+                    bad_nodes.append(a_node)
+                    continue
             for b_node in self.nodes:
-                if a_node==b_node:
+                if b_node in bad_nodes or b_node==a_node:
                     continue
                 for k,v in kwargs.items():
-                    if k in a_node.attrs and k in b_node.attrs:
-                        if a_node.attrs[k]==v and b_node.attrs[k]==v:
-                            if not a_node.is_connected(b_node) and not b_node.is_connected(a_node):
-                                a_node.connect_to(b_node)
+                    if k in b_node.attrs:
+                        if b_node.attrs[k]==v:
+                            if not b_node.is_connected(a_node):
                                 b_node.connect_to(a_node)
-                                if not a_node in self.unique_matches:
-                                    self.unique_matches.append(a_node)
-                                if not b_node in self.unique_matches:
-                                    self.unique_matches.append(b_node)
+                                self.similar_nodes_amount+=1
+                            if not a_node.is_connected(b_node):
+                                a_node.connect_to(b_node)
+                                self.similar_nodes_amount+=1
+                            if not a_node in self.unique_matches:
+                                self.unique_matches.append(a_node)
+                            if not b_node in self.unique_matches:
+                                self.unique_matches.append(b_node)
+                        else:
+                            bad_nodes.append(b_node)
+                            continue
                     else:
+                        bad_nodes.append(b_node)
                         continue
         self.similar_nodes_amount=len(self.unique_matches)
     def strict_connect_nodes_by(self,*args,**kwargs):
+        bad_nodes=[]
         for a_node in self.nodes:
+            if a_node in bad_nodes:
+                continue
             bad_a_node=False
             for k,v in kwargs.items():
                 if k in a_node.attrs:
@@ -100,9 +123,12 @@ class Graph(object):
                     break
             if bad_a_node:
                 bad_a_node=False
+                bad_nodes.append(a_node)
                 continue
             else:
                 for b_node in self.nodes:
+                    if b_node in bad_nodes:
+                        continue
                     bad_b_node=False
                     for k,v in kwargs.items():
                         if k in b_node.attrs:
@@ -116,15 +142,18 @@ class Graph(object):
                             break
                     if bad_b_node:
                         bad_b_node=False
+                        bad_nodes.append(b_node)
                         continue
                     else:
-                        if not a_node.is_connected(b_node) and not b_node.is_connected(a_node):
+                        if not a_node.is_connected(b_node):
                             a_node.connect_to(b_node)
+                            self.similar_nodes_amount+=1
+                        if not b_node.is_connected(a_node):
                             b_node.connect_to(a_node)
                             self.similar_nodes_amount+=1
-                            if not a_node in self.unique_matches:
-                                self.unique_matches.append(a_node)
-                            if not b_node in self.unique_matches:
-                                self.unique_matches.append(b_node)
+                        if not a_node in self.unique_matches:
+                            self.unique_matches.append(a_node)
+                        if not b_node in self.unique_matches:
+                            self.unique_matches.append(b_node)
         self.similar_nodes_amount=len(self.unique_matches)
     
