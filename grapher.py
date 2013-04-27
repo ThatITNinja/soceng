@@ -69,6 +69,8 @@ class Graph(object):
             n_count+=1
     def loose_connect_nodes_by(self,*args,**kwargs):
         bad_nodes=[]
+        def _():
+            pass
         for a_node in self.nodes:
             if a_node in bad_nodes:
                 continue
@@ -76,6 +78,12 @@ class Graph(object):
                 if k in a_node.attrs:
                     if a_node.attrs[k]==v:
                         continue
+                    elif type(v)==type(_):
+                        if v(a_node):
+                            continue
+                        else:
+                            bad_nodes.append(a_node)
+                            continue
                     else:
                         bad_nodes.append(a_node)
                         continue
@@ -98,6 +106,17 @@ class Graph(object):
                                 self.unique_matches.append(a_node)
                             if not b_node in self.unique_matches:
                                 self.unique_matches.append(b_node)
+                        elif type(v)==type(_):
+                            if not b_node.is_connected(a_node):
+                                b_node.connect_to(a_node)
+                                self.similar_nodes_amount+=1
+                            if not a_node.is_connected(b_node):
+                                a_node.connect_to(b_node)
+                                self.similar_nodes_amount+=1
+                            if not a_node in self.unique_matches:
+                                self.unique_matches.append(a_node)
+                            if not b_node in self.unique_matches:
+                                self.unique_matches.append(b_node)
                         else:
                             bad_nodes.append(b_node)
                             continue
@@ -107,6 +126,8 @@ class Graph(object):
         self.similar_nodes_amount=len(self.unique_matches)
     def strict_connect_nodes_by(self,*args,**kwargs):
         bad_nodes=[]
+        def _():
+            pass
         for a_node in self.nodes:
             if a_node in bad_nodes:
                 continue
@@ -115,6 +136,12 @@ class Graph(object):
                 if k in a_node.attrs:
                     if a_node.attrs[k]==v:
                         continue
+                    elif type(v)==type(_):
+                        if v(a_node):
+                            continue
+                        else:
+                            bad_a_node=True
+                            break
                     else:
                         bad_a_node=True
                         break
@@ -134,6 +161,12 @@ class Graph(object):
                         if k in b_node.attrs:
                             if b_node.attrs[k]==v:
                                 continue
+                            elif type(v)==type(_):
+                                if v(b_node):
+                                    continue
+                                else:
+                                    bad_b_node=True
+                                    break
                             else:
                                 bad_b_node=True
                                 break
