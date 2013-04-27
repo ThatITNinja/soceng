@@ -51,21 +51,64 @@ class Graph(object):
             self.nodes.remove(node)
         except ValueError:
             return 1
-    def remove_nodes(self,limit=1,*args,**kwargs):
+    def loose_remove_nodes(self,limit=1,*args,**kwargs):
         n_count=0
         del_count=0
         done=False
+        def _():
+            pass
         for node in self.nodes:
             if done or del_count==limit:
                 break
-            for key,value in kwargs.items():
-                if del_count==limit:
-                    done=True
-                if key in node.attrs:
-                    if node.attrs[key]==value:
+            for k,v in kwargs.items():
+                if k in node.attrs:
+                    if node.attrs[k]==v:
                         del self.nodes[n_count]
                         del_count+=1
+                        break_out=True
+                        break
+                    elif type(v)==type(_):
+                        if v(node):
+                            del self.nodes[n_count]
+                            del_count+=1
+                            break_out=True
+                            break
             n_count+=1
+            if break_out:
+                continue
+    def strict_remove_nodes(self,limit=1,*args,**kwargs):
+        n_count=0
+        del_count=0
+        done=False
+        def _():
+            pass
+        for node in self.nodes:
+            if done or del_count==limit:
+                break
+            bad_node=True
+            for k,v in kwargs.items():
+                if k in node.attrs:
+                    if node.attrs[k]==v:
+                        continue
+                    elif type(v)==type(_):
+                        if v(node):
+                            continue
+                        else:
+                            bad_node=False
+                            break
+                    else:
+                        bad_node=False
+                        break
+                else:
+                    bad_node=False
+                    break
+            if not bad_node:
+                continue
+            else:
+                del self.nodes[n_count]
+                del_count+=1
+            n_count+=1
+                        
     def loose_connect_nodes_by(self,*args,**kwargs):
         bad_nodes=[]
         def _():
@@ -148,7 +191,6 @@ class Graph(object):
                     bad_a_node=True
                     break
             if bad_a_node:
-                bad_a_node=False
                 bad_nodes.append(a_node)
                 continue
             else:
@@ -173,7 +215,6 @@ class Graph(object):
                             bad_b_node=True
                             break
                     if bad_b_node:
-                        bad_b_node=False
                         bad_nodes.append(b_node)
                         continue
                     else:
