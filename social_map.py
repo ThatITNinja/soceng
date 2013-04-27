@@ -22,26 +22,26 @@
 #  
 #  
 from grapher import *
-import random
-def facebook_network(g,node_limit=100):
+import random,profile
+def network(g,node_limit=100):
     country=["america","spain","russia","germany","italy"]
     age=[x for x in xrange(15,80)]
     grade=[x for x in xrange(1,13)]
     sports=["soccer","football","basketball","skateboarding","surfing"]
-    for person in range(node_limit+1):
+    for person in range(node_limit):
         x=g.new_node(country=random.choice(country),age=random.choice(age),
                    grade=random.choice(grade),sports=random.choice(sports))
-        print x.attrs
+        #print x.attrs
 def main():
     graph=Graph()
-    facebook_network(graph)
+    network(graph)
     graph.strict_connect_nodes_by(country="italy",sports="surfing")
     graph.loose_connect_nodes_by(age=55)
-    print graph.similar_nodes_amount
     for x in graph.unique_matches:
         print x.attrs
+    print graph.connections
     return 0
 
 if __name__ == '__main__':
-	main()
+	profile.run('main()')
 

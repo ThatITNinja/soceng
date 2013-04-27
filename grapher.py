@@ -39,8 +39,7 @@ class Node(object):
 class Graph(object):
     nodes=[]
     def __init__(self):
-        self.total_connections=0
-        self.similar_nodes_amount=0
+        self.connections=0
         self.unique_matches=[]
     def new_node(self,*args,**kwargs):
         node_var=Node()
@@ -98,7 +97,7 @@ class Graph(object):
                         if b_node.attrs[k]==v:
                             if not b_node.is_connected(a_node):
                                 b_node.connect_to(a_node)
-                                self.similar_nodes_amount+=1
+                                self.connections+=1
                             if not a_node.is_connected(b_node):
                                 a_node.connect_to(b_node)
                                 self.similar_nodes_amount+=1
@@ -112,7 +111,7 @@ class Graph(object):
                                 self.similar_nodes_amount+=1
                             if not a_node.is_connected(b_node):
                                 a_node.connect_to(b_node)
-                                self.similar_nodes_amount+=1
+                                self.connections+=1
                             if not a_node in self.unique_matches:
                                 self.unique_matches.append(a_node)
                             if not b_node in self.unique_matches:
@@ -180,10 +179,10 @@ class Graph(object):
                     else:
                         if not a_node.is_connected(b_node):
                             a_node.connect_to(b_node)
-                            self.similar_nodes_amount+=1
+                            self.connections+=1
                         if not b_node.is_connected(a_node):
                             b_node.connect_to(a_node)
-                            self.similar_nodes_amount+=1
+                            self.connections+=1
                         if not a_node in self.unique_matches:
                             self.unique_matches.append(a_node)
                         if not b_node in self.unique_matches:
