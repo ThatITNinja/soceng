@@ -37,10 +37,20 @@ class Node(object):
     def get_connected(self):
         return self.connected_to
 class Graph(object):
-    nodes=[]
     def __init__(self):
         self.connections=0
         self.unique_matches=[]
+        self.nodes=[]
+    def clear_nodes_attrs(self):
+        for x in self.nodes:
+            x.attrs={}
+    def clear_nodes_connections(self):
+        for x in self.nodes:
+            x.clear_connected()
+        self.unique_matches=[]
+        self.connections=0
+    def remove_all_nodes(self):
+        self.nodes=[]
     def new_node(self,*args,**kwargs):
         node_var=Node()
         node_var.attrs=kwargs
@@ -52,12 +62,11 @@ class Graph(object):
         except ValueError:
             return 1
     def loose_remove_nodes(self,limit=1,*args,**kwargs):
-        n_count=0
         del_count=0
         done=False
         def _():
             pass
-        for node in self.nodes:
+        for n_count,node in enumerate(self.nodes[::]):
             if done or del_count==limit:
                 break
             for k,v in kwargs.items():
@@ -73,16 +82,14 @@ class Graph(object):
                             del_count+=1
                             break_out=True
                             break
-            n_count+=1
             if break_out:
                 continue
     def strict_remove_nodes(self,limit=1,*args,**kwargs):
-        n_count=0
         del_count=0
         done=False
         def _():
             pass
-        for node in self.nodes:
+        for n_count,node in enumerate(self.nodes[::]):
             if done or del_count==limit:
                 break
             bad_node=True
@@ -107,14 +114,16 @@ class Graph(object):
             else:
                 del self.nodes[n_count]
                 del_count+=1
-            n_count+=1
                         
-    def loose_connect_nodes_by(self,*args,**kwargs):
+    def loose_connect_nodes_by(self,node_connect_limit=None,*args,**kwargs):
         bad_nodes=[]
         def _():
             pass
         for a_node in self.nodes:
             if a_node in bad_nodes:
+                continue
+            if node_connect_limit != None and node_connect_limit==len(a_node.get_connected()):
+                bad_nodes.append(a_node)
                 continue
             for k,v in kwargs.items():
                 if k in a_node.attrs:
@@ -134,6 +143,9 @@ class Graph(object):
                     continue
             for b_node in self.nodes:
                 if b_node in bad_nodes or b_node==a_node:
+                    continue
+                if node_connect_limit != None and node_connect_limit==len(b_node.get_connected()):
+                    bad_nodes.append(b_node)
                     continue
                 for k,v in kwargs.items():
                     if k in b_node.attrs:
@@ -166,12 +178,15 @@ class Graph(object):
                         bad_nodes.append(b_node)
                         continue
         self.similar_nodes_amount=len(self.unique_matches)
-    def strict_connect_nodes_by(self,*args,**kwargs):
+    def strict_connect_nodes_by(self,node_connect_limit=None,*args,**kwargs):
         bad_nodes=[]
         def _():
             pass
         for a_node in self.nodes:
             if a_node in bad_nodes:
+                continue
+            if node_connect_limit != None and node_connect_limit==len(a_node.get_connected()):
+                bad_nodes.append(a_node)
                 continue
             bad_a_node=False
             for k,v in kwargs.items():
@@ -195,7 +210,10 @@ class Graph(object):
                 continue
             else:
                 for b_node in self.nodes:
-                    if b_node in bad_nodes:
+                    if b_node in bad_nodes or b_node==a_node:
+                        continue
+                    if node_connect_limit != None and node_connect_limit==len(b_node.get_connected()):
+                        bad_nodes.append(b_node)
                         continue
                     bad_b_node=False
                     for k,v in kwargs.items():
