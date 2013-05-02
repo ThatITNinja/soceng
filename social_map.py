@@ -22,26 +22,66 @@
 #  
 #  
 from grapher import *
-import random,profile
+import random,profile,time
 def network(g,node_limit=100):
-    country=["america","spain","russia","germany","italy"]
-    age=[x for x in xrange(15,80)]
-    grade=[x for x in xrange(1,13)]
-    sports=["soccer","football","basketball","skateboarding","surfing"]
-    for person in range(node_limit):
-        x=g.new_node(country=random.choice(country),age=random.choice(age),
-                   grade=random.choice(grade),sports=random.choice(sports))
-        #print x.attrs
+    name_list=[]
+    sports=["soccer","baseball","football","skateboarding","surfing",
+            "longboarding","swimming"]
+    grades=[x for x in xrange(1,12)]
+    age_grade_assoc={1:[5,6],
+                     2:[6,7],
+                     3:[7,8],
+                     4:[8,9],
+                     5:[9,10],
+                     6:[10,11],
+                     7:[11,12],
+                     8:[12,13],
+                     9:[13,14],
+                     10:[14,15],
+                     11:[15,16],
+                     12:[16,17]}
+    countries=["US","Russia","Cuba","Iran","Algeria"]
+    t=[0 for x in range(3)]
+    print "Populating name list with [x,x,x], total names: 24^3..."
+    for x in xrange(97,123):
+        t[0]=chr(x)
+        for y in xrange(97,123):
+            t[1]=chr(y)
+            for z in xrange(97,123):
+                t[2]=chr(z)
+                name_list.append("".join(t))
+    print "Names generated:",str(len(name_list))
+    print "Deallocating temp buffer..."
+    t=[]
+    print "Generating nodes..."
+    for x in xrange(0,1000):
+        node=g.new_node(sport=random.choice(sports),
+                        grade=random.choice(grades),
+                        name=random.choice(name_list))
+        name_list.remove(node.attrs['name'])
+        node.attrs['age']=random.choice(age_grade_assoc[node.attrs['grade']])
+    print "Deallocating unused names..."
+    name_list=[]
+def simulate_outbreak(g,*args,**kwargs):
+    g.clear_nodes_connections()
+    print "Connecting nodes..."
+    eval('g.strict_connect_nodes_by(%s)'% ",".join("%s=%s"%(k,v) for (k,v) in kwargs.items()))
+    print "Infecting %s nodes..." % str(len(g.unique_matches))
+    for node in g.unique_matches:
+        node.attrs["infected"]=True
 def main():
     graph=Graph()
     network(graph)
-    graph.strict_connect_nodes_by(country="italy",sports="surfing")
-    graph.loose_connect_nodes_by(age=55)
+    simulate_outbreak(graph,grade=8)
     for x in graph.unique_matches:
         print x.attrs
     print graph.connections
+    graph.remove_all_nodes()
+    raw_input("...")
     return 0
 
 if __name__ == '__main__':
-	profile.run('main()')
+	#profile.run('main()')
+    main()
+    #time.sleep(1)
 
