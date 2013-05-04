@@ -37,10 +37,14 @@ class Node(object):
     def get_connected(self):
         return self.connected_to
 class Graph(object):
-    def __init__(self):
+    def __init__(self,node_limit=None):
+        def _():
+            pass
+        self._=_
         self.connections=0
         self.unique_matches=[]
         self.nodes=[]
+        self.node_limit=node_limit
     def clear_nodes_attrs(self):
         for x in self.nodes:
             x.attrs={}
@@ -52,6 +56,9 @@ class Graph(object):
     def remove_all_nodes(self):
         self.nodes=[]
     def new_node(self,*args,**kwargs):
+        if self.node_limit != None and len(self.nodes)==self.node_limit:
+            raise Exception("Node list capacity reached.")
+            return
         node_var=Node()
         node_var.attrs=kwargs
         self.nodes.append(node_var)
@@ -64,8 +71,6 @@ class Graph(object):
     def loose_remove_nodes(self,limit=1,*args,**kwargs):
         del_count=0
         done=False
-        def _():
-            pass
         for n_count,node in enumerate(self.nodes[::]):
             if done or del_count==limit:
                 break
@@ -76,7 +81,7 @@ class Graph(object):
                         del_count+=1
                         break_out=True
                         break
-                    elif type(v)==type(_):
+                    elif type(v)==type(self._):
                         if v(node):
                             del self.nodes[n_count]
                             del_count+=1
@@ -87,8 +92,6 @@ class Graph(object):
     def strict_remove_nodes(self,limit=1,*args,**kwargs):
         del_count=0
         done=False
-        def _():
-            pass
         for n_count,node in enumerate(self.nodes[::]):
             if done or del_count==limit:
                 break
@@ -97,7 +100,7 @@ class Graph(object):
                 if k in node.attrs:
                     if node.attrs[k]==v:
                         continue
-                    elif type(v)==type(_):
+                    elif type(v)==type(self._):
                         if v(node):
                             continue
                         else:
@@ -117,8 +120,6 @@ class Graph(object):
                         
     def loose_connect_nodes_by(self,node_connect_limit=None,*args,**kwargs):
         bad_nodes=[]
-        def _():
-            pass
         for a_node in self.nodes:
             if a_node in bad_nodes:
                 continue
@@ -129,7 +130,7 @@ class Graph(object):
                 if k in a_node.attrs:
                     if a_node.attrs[k]==v:
                         continue
-                    elif type(v)==type(_):
+                    elif type(v)==type(self._):
                         if v(a_node):
                             continue
                         else:
@@ -161,16 +162,20 @@ class Graph(object):
                             if not b_node in self.unique_matches:
                                 self.unique_matches.append(b_node)
                         elif type(v)==type(_):
-                            if not b_node.is_connected(a_node):
-                                b_node.connect_to(a_node)
-                                self.similar_nodes_amount+=1
-                            if not a_node.is_connected(b_node):
-                                a_node.connect_to(b_node)
-                                self.connections+=1
-                            if not a_node in self.unique_matches:
-                                self.unique_matches.append(a_node)
-                            if not b_node in self.unique_matches:
-                                self.unique_matches.append(b_node)
+                            if v(b_node):
+                                if not b_node.is_connected(a_node):
+                                    b_node.connect_to(a_node)
+                                    self.similar_nodes_amount+=1
+                                if not a_node.is_connected(b_node):
+                                    a_node.connect_to(b_node)
+                                    self.connections+=1
+                                if not a_node in self.unique_matches:
+                                    self.unique_matches.append(a_node)
+                                if not b_node in self.unique_matches:
+                                    self.unique_matches.append(b_node)
+                            else:
+                                bad_nodes.append(b_node)
+                                continue
                         else:
                             bad_nodes.append(b_node)
                             continue
@@ -180,8 +185,6 @@ class Graph(object):
         self.similar_nodes_amount=len(self.unique_matches)
     def strict_connect_nodes_by(self,node_connect_limit=None,*args,**kwargs):
         bad_nodes=[]
-        def _():
-            pass
         for a_node in self.nodes:
             if a_node in bad_nodes:
                 continue
@@ -193,7 +196,7 @@ class Graph(object):
                 if k in a_node.attrs:
                     if a_node.attrs[k]==v:
                         continue
-                    elif type(v)==type(_):
+                    elif type(v)==type(self._):
                         if v(a_node):
                             continue
                         else:
@@ -220,7 +223,7 @@ class Graph(object):
                         if k in b_node.attrs:
                             if b_node.attrs[k]==v:
                                 continue
-                            elif type(v)==type(_):
+                            elif type(v)==type(self._):
                                 if v(b_node):
                                     continue
                                 else:
